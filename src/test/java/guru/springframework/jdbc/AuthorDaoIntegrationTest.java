@@ -8,9 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @ActiveProfiles("local")
@@ -69,7 +71,8 @@ public class AuthorDaoIntegrationTest {
         authorDao.deleteAuthorById(savedAuthor.getId());
 
         // Check it actually worked
-        Author deletedAuthor = authorDao.getById(savedAuthor.getId());
-        assertThat(deletedAuthor).isNull();
+        assertThrows(EmptyResultDataAccessException.class, () -> {
+            authorDao.getById(savedAuthor.getId());
+        });
     }
 }
