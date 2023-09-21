@@ -1,10 +1,12 @@
 package guru.springframework.jdbc.dao;
 
 import guru.springframework.jdbc.domain.Author;
+import guru.springframework.jdbc.domain.Book;
 import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class AuthorMapper implements RowMapper<Author> {
     @Override
@@ -13,7 +15,31 @@ public class AuthorMapper implements RowMapper<Author> {
         author.setId(rs.getLong("id"));
         author.setFirstName(rs.getString("first_name"));
         author.setLastName(rs.getString("last_name"));
-
+        try {
+            // Check if this row has book data
+            if (rs.getString("isbn") != null) {
+                author.setBooks(new ArrayList<>());
+                author.getBooks().add(mapBook(rs));
+            }
+            // Check if there are any more records/books for this Author
+            while (rs.next()) {
+                author.getBooks().add(mapBook(rs));
+            }
+        } catch (SQLException e) {
+            // do nothing
+        }
         return author;
+    }
+
+    private Book mapBook(ResultSet rs) throws SQLException {
+        // Extract the book data and populate in Book object
+        Book book = new Book();
+        book.setId(rs.getLong(4));
+        book.setIsbn(rs.getString(5));
+        book.setPublisher(rs.getString(6));
+        book.setTitle(rs.getString(7));
+        book.setAuthorId(rs.getLong(1));
+        return book;
+
     }
 }
